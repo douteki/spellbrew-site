@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spellbrew — a witchy word game for Discord</title>
+<meta name="description" content="A witchy word game for Discord with no spellcheck and no timer. Brew real words, bluff fake ones, and catch your friends lying.">
+<meta property="og:title" content="Spellbrew">
+<meta property="og:description" content="A witchy word game for Discord. Brew real words, bluff fake ones, and catch your friends lying.">
+<meta property="og:image" content="https://spellbrew.com/assets/board.png">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #241829;        /* the inside of the cauldron at night */
+    --iron: #3a2848;         /* Crown Jewel, a shade deeper */
+    --brew: #4e923a;         /* Enviable */
+    --brew-deep: #2e3d30;    /* Mountain View */
+    --lime: #b7db57;         /* Badass Grass */
+    --violet: #8e51a8;       /* Vibrant Violet: the potions */
+    --label: #efe3c8;        /* old apothecary label paper */
+    --ink: #2b1d22;          /* label ink */
+    --copper: #c4743e;       /* the ladle */
+    --text: #e9e2ef;
+    --muted: #b9adc4;
+    --px: 4px;               /* one pixel of the pixel art */
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--text);
+    font: 400 1.25rem/1.6 "IM Fell English", Georgia, "Times New Roman", serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; height: auto; display: block; image-rendering: pixelated; }
+  a { color: var(--lime); text-underline-offset: 3px; }
+  a:focus-visible, .btn:focus-visible { outline: 3px solid var(--lime); outline-offset: 4px; }
+  h1, h2, h3 { font-family: "Pixelify Sans", "Courier New", monospace; font-weight: 700; line-height: 1.15; margin: 0; }
+  .wrap { width: min(1120px, 100% - 3rem); margin-inline: auto; }
+
+  /* ---------- top bar ---------- */
+  .bar { display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem 0; }
+  .bar .mark { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--text);
+               font: 700 1.25rem "Pixelify Sans", monospace; }
+  .bar .mark img { width: 40px; height: 40px; border-radius: 50%; image-rendering: auto; }
+  .bar nav { margin-left: auto; display: flex; gap: 1.5rem; font-size: 1rem; }
+  .bar nav a { color: var(--muted); text-decoration: none; }
+  .bar nav a:hover { color: var(--text); }
+
+  /* ---------- pixel buttons: square, stepped corners, a hard drop "shadow" ---------- */
+  .btn {
+    --face: var(--violet); --edge: #4c2a5c;
+    display: inline-block; position: relative;
+    font: 700 1.125rem "Pixelify Sans", monospace; color: #fff; text-decoration: none;
+    padding: .8rem 1.4rem; background: var(--face);
+    box-shadow: 0 calc(var(--px) * -1) 0 0 var(--face), 0 var(--px) 0 0 var(--face),
+                calc(var(--px) * -1) 0 0 0 var(--face), var(--px) 0 0 0 var(--face),
+                0 calc(var(--px) * 2) 0 0 var(--edge), var(--px) var(--px) 0 0 var(--edge), calc(var(--px) * -1) var(--px) 0 0 var(--edge);
+    margin: var(--px);
+    transition: transform .08s;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: translateY(var(--px)); }
+  .btn.green { --face: var(--brew); --edge: #2c5520; }
+
+  /* ---------- hero ---------- */
+  .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 3rem; align-items: center; padding: 2.5rem 0 5rem; }
+  .word { display: flex; flex-wrap: wrap; gap: .2rem .1rem; margin: 0 0 1.75rem -6px; }
+  .word span { display: flex; gap: .1rem; }
+  .word img { width: clamp(46px, 6vw, 72px); height: auto; }
+  .hero h1 { font-size: clamp(1.6rem, 3.2vw, 2.4rem); color: var(--lime); margin-bottom: 1rem; }
+  .hero p { max-width: 30rem; color: var(--text); margin: 0 0 2rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 1rem 1.25rem; align-items: center; }
+  .actions small { display: block; width: 100%; color: var(--muted); font-size: .95rem; margin-top: .25rem; }
+  .board { position: relative; }
+  .board img { border-radius: 18px; box-shadow: 0 30px 60px -20px rgba(10, 4, 14, .8); image-rendering: auto; }
+
+  /* the one moment of motion: the name pours in, bottle by bottle */
+  @media (prefers-reduced-motion: no-preference) {
+    .word img { animation: pour .5s cubic-bezier(.3, 1.5, .5, 1) both; }
+    .word img:nth-child(2) { animation-delay: .06s } .word img:nth-child(3) { animation-delay: .12s }
+    .word img:nth-child(4) { animation-delay: .18s } .word img:nth-child(5) { animation-delay: .24s }
+    .word span + span img:nth-child(1) { animation-delay: .34s } .word span + span img:nth-child(2) { animation-delay: .40s }
+    .word span + span img:nth-child(3) { animation-delay: .46s } .word span + span img:nth-child(4) { animation-delay: .52s }
+    @keyframes pour { from { transform: translateY(-40px) rotate(-12deg); opacity: 0; } }
+  }
+
+  /* ---------- the recipe: an apothecary label pinned to the page ---------- */
+  .recipe-wrap { background: var(--iron); padding: 5rem 0; }
+  .recipe {
+    background: var(--label); color: var(--ink);
+    max-width: 860px; margin-inline: auto; padding: 3rem clamp(1.5rem, 5vw, 4rem) 3.25rem;
+    position: relative;
+    /* stepped pixel corners and a thin double rule, like a printed label */
+    clip-path: polygon(0 12px, 4px 12px, 4px 8px, 8px 8px, 8px 4px, 12px 4px, 12px 0, calc(100% - 12px) 0, calc(100% - 12px) 4px, calc(100% - 8px) 4px, calc(100% - 8px) 8px, calc(100% - 4px) 8px, calc(100% - 4px) 12px, 100% 12px, 100% calc(100% - 12px), calc(100% - 4px) calc(100% - 12px), calc(100% - 4px) calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) calc(100% - 4px), calc(100% - 12px) calc(100% - 4px), calc(100% - 12px) 100%, 12px 100%, 12px calc(100% - 4px), 8px calc(100% - 4px), 8px calc(100% - 8px), 4px calc(100% - 8px), 4px calc(100% - 12px), 0 calc(100% - 12px));
+  }
+  .recipe::before { content: ""; position: absolute; inset: 14px; border: 2px solid #b79d72; outline: 1px solid #b79d72; outline-offset: 4px; pointer-events: none; }
+  .recipe h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); color: #5a2f6b; text-align: center; }
+  .recipe .serves { text-align: center; font-style: italic; margin: .35rem 0 2rem; color: #6b5440; }
+  .recipe-cols { display: grid; grid-template-columns: 1fr 1.6fr; gap: 2.5rem; }
+  .recipe h3 { font-size: 1.15rem; color: #5a2f6b; margin-bottom: .75rem; }
+  .recipe ul { list-style: none; padding: 0; margin: 0; }
+  .recipe ul li { padding-left: 1.4rem; position: relative; margin-bottom: .5rem; }
+  .recipe ul li::before { content: ""; position: absolute; left: 0; top: .62em; width: 8px; height: 8px; background: var(--brew); box-shadow: 0 -4px 0 -2px var(--lime); }
+  .recipe ol { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  .recipe ol li { counter-increment: step; position: relative; padding-left: 2.6rem; margin-bottom: 1rem; }
+  .recipe ol li::before { content: counter(step); position: absolute; left: 0; top: .1rem;
+    width: 1.8rem; height: 1.8rem; display: grid; place-items: center;
+    font: 700 1rem "Pixelify Sans", monospace; color: #fff; background: var(--violet); }
+  .recipe strong { color: #3d1f4a; }
+
+  /* ---------- the shelf ---------- */
+  .shelf { padding: 5rem 0 2rem; display: grid; grid-template-columns: auto 1fr; gap: 3rem; align-items: center; }
+  .shelf img { width: min(520px, 100%); }
+  .shelf h2, .moon h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: .75rem; }
+  .shelf p, .moon p { max-width: 34rem; margin: 0 0 1rem; color: var(--text); }
+
+  /* ---------- the full moon ---------- */
+  .moon { padding: 4rem 0 6rem; display: grid; grid-template-columns: 1fr 1.05fr; gap: 3rem; align-items: center; }
+  .moon img { border-radius: 18px; image-rendering: auto; }
+  .moon .soon { color: var(--muted); font-style: italic; }
+
+  /* ---------- footer: the last call to action, sat on the rim of the pot ---------- */
+  footer { background: var(--brew-deep); padding: 3.5rem 0 2.5rem; }
+  .last { display: flex; flex-wrap: wrap; gap: 1.5rem 2rem; align-items: center; justify-content: space-between; }
+  .last h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); max-width: 28rem; }
+  .fine { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; font-size: .95rem; color: var(--muted); }
+  .fine a { color: var(--muted); }
+
+  @media (max-width: 860px) {
+    .hero, .moon, .shelf { grid-template-columns: 1fr; gap: 2rem; }
+    .recipe-cols { grid-template-columns: 1fr; gap: 1.5rem; }
+    .moon img { order: -1; }
+    .bar nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="mark" href="#top"><img src="assets/logo.png" alt="">Spellbrew</a>
+    <nav aria-label="Main">
+      <a href="#recipe">How it plays</a>
+      <a href="#moon">Events</a>
+      <a href="https://discord.gg/EPm9yAE4PT">Community</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div>
+        <div class="word" aria-label="Spellbrew" role="img">
+          <span><img src="assets/bottle-s.png" alt=""><img src="assets/bottle-p.png" alt=""><img src="assets/bottle-e.png" alt=""><img src="assets/bottle-l.png" alt=""><img src="assets/bottle-l.png" alt=""></span>
+          <span><img src="assets/bottle-b.png" alt=""><img src="assets/bottle-r.png" alt=""><img src="assets/bottle-e.png" alt=""><img src="assets/bottle-w.png" alt=""></span>
+        </div>
+        <h1>Every word is a spell.</h1>
+        <p>A word game for Discord. No spellcheck, no timer. Play real words, bluff fake ones, and catch your friends lying.</p>
+        <div class="actions">
+          <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1548506624493224027">Add to Discord</a>
+          <a class="btn green" href="https://discord.gg/EPm9yAE4PT">Play in our server</a>
+          <small>Free to play. 2–4 players.</small>
+        </div>
+      </div>
+      <div class="board">
+        <img src="assets/board.png" width="836" height="836" alt="A Spellbrew board: purple potion bottles spelling CAULDRON, WITCH, POTION and more, floating in green brew inside a cauldron.">
+      </div>
+    </section>
+  </main>
+</div>
+
+<section class="recipe-wrap" id="recipe">
+  <div class="wrap">
+    <article class="recipe">
+      <h2>How it works</h2>
+      <p class="serves">For 2 to 4 brewers. Take your time.</p>
+      <div class="recipe-cols">
+        <div>
+          <h3>You’ll need</h3>
+          <ul>
+            <li>A Discord server</li>
+            <li>A friend or three</li>
+            <li>A little nerve</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Method</h3>
+          <ol>
+            <li>Tap <strong>New game</strong> and pick who’s playing.</li>
+            <li>Take turns placing words. Any word goes.</li>
+            <li>Think a word is fake? Hit <strong>Challenge</strong>. Fakes lose their points. Wrong guesses lose a turn.</li>
+            <li>At the end, <strong>The Trials</strong> reveal every bluff nobody caught.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<div class="wrap">
+  <section class="shelf">
+    <img src="assets/shelf.png" width="364" height="74" alt="A shelf of seven potion bottles: B, R, E, W, a golden unlabeled bottle, N and G.">
+    <div>
+      <h2>No rush</h2>
+      <p>Take your turn whenever you like. The bot reminds whoever’s up next.</p>
+      <p>Real words come from the official tournament word lists. US and UK spellings both count.</p>
+    </div>
+  </section>
+
+  <section class="moon" id="moon">
+    <div>
+      <h2>Full moon nights</h2>
+      <p>Once a month the board turns silver. Some words score double, potions can turn wild, and a werewolf hides among the players.</p>
+      <p class="soon">Yuletide is coming in December.</p>
+    </div>
+    <img src="assets/moon-board.png" width="836" height="836" alt="The same board under the full moon: silver potions and three golden wild potions with little wolf ears, in a midnight-blue brew with pale blue fire round the rim.">
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="last">
+      <h2>Ready to brew?</h2>
+      <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1548506624493224027">Add to Discord</a>
+    </div>
+    <div class="fine">
+      <span>© 2026 Spellbrew</span>
+      <a href="privacy">Privacy</a>
+      <a href="terms">Terms</a>
+      <a href="https://top.gg/bot/1548506624493224027">Top.gg</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

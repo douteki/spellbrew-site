@@ -126,6 +126,18 @@
   .moon img { border-radius: 18px; image-rendering: auto; }
   .moon .soon { color: var(--muted); font-style: italic; }
 
+  /* ---------- questions: short answers in two columns, each tagged with a little potion-coloured block ---------- */
+  .faq { padding: 1rem 0 6rem; }
+  .faq > h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: 2rem; }
+  .faq dl { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem 3.5rem; margin: 0; }
+  .faq dt { font: 700 1.05rem/1.3 "Pixelify Sans", monospace; color: var(--lime); margin-bottom: .4rem;
+            padding-left: 1.25rem; position: relative; }
+  .faq dt::before { content: ""; position: absolute; left: 0; top: .35em; width: 8px; height: 8px; background: var(--violet);
+                    box-shadow: 4px 4px 0 0 #4c2a5c; }
+  .faq dd { margin: 0; padding-left: 1.25rem; color: var(--text); }
+  .faq code { font: .95rem "Courier New", monospace; background: var(--iron); padding: .05rem .35rem; color: var(--label); white-space: nowrap; }
+  @media (max-width: 860px) { .faq dl { grid-template-columns: 1fr; } }
+
   /* ---------- footer: the last call to action, sat on the rim of the pot ---------- */
   footer { background: var(--brew-deep); padding: 3.5rem 0 2.5rem; }
   .last { display: flex; flex-wrap: wrap; gap: 1.5rem 2rem; align-items: center; justify-content: space-between; }
@@ -149,6 +161,7 @@
     <nav aria-label="Main">
       <a href="#recipe">How it plays</a>
       <a href="#moon">Events</a>
+      <a href="#questions">Questions</a>
       <a href="https://discord.gg/EPm9yAE4PT">Community</a>
     </nav>
   </header>
@@ -160,9 +173,8 @@
           <span><img src="assets/bottle-s.png" alt=""><img src="assets/bottle-p.png" alt=""><img src="assets/bottle-e.png" alt=""><img src="assets/bottle-l.png" alt=""><img src="assets/bottle-l.png" alt=""></span>
           <span><img src="assets/bottle-b.png" alt=""><img src="assets/bottle-r.png" alt=""><img src="assets/bottle-e.png" alt=""><img src="assets/bottle-w.png" alt=""></span>
         </div>
-        <h1>Something's brewing.</h1>
-        <h1>Can you spell it?</h1>
-        <p>A word game for Discord. No spellcheck, no timer. Play real words, bluff fake ones, and catch your friends lying.</p>
+        <h1>Something’s brewing.<br>Can you spell it?</h1>
+        <p>A word game for Discord. No spellcheck, no timer. Play real words, play fake ones, and argue with your friends about which is which.</p>
         <div class="actions">
           <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1548506624493224027">Add to Discord</a>
           <a class="btn green" href="https://discord.gg/EPm9yAE4PT">Play in our server</a>
@@ -194,7 +206,7 @@
           <h3>Method</h3>
           <ol>
             <li>Tap <strong>New game</strong> and pick who’s playing.</li>
-            <li>Take turns placing words. Any word goes.</li>
+            <li>Take turns placing words. (Almost) any word goes.</li>
             <li>Think a word is fake? Hit <strong>Challenge</strong>. Fakes lose their points. Wrong guesses lose a turn.</li>
             <li>At the end, <strong>The Trials</strong> reveal every bluff nobody caught.</li>
           </ol>
@@ -209,8 +221,8 @@
     <img src="assets/shelf.png" width="364" height="74" alt="A shelf of seven potion bottles: B, R, E, W, a golden unlabeled bottle, N and G.">
     <div>
       <h2>No rush</h2>
-      <p>Take your turn whenever you like. The bot reminds whoever’s up next.</p>
-      <p>Real words come from the official tournament word lists. US and UK spellings both count.</p>
+      <p>Take your turn whenever you like: over breakfast, on the bus, three days later. The bot gently reminds whoever’s holding everyone up.</p>
+      <p>Real words come from the official tournament word lists. US and UK spellings both count, so nobody gets to argue about <em>colour</em>.</p>
     </div>
   </section>
 
@@ -221,6 +233,28 @@
       <p class="soon">Yuletide is coming in December.</p>
     </div>
     <img src="assets/moon-board.png" width="836" height="836" alt="The same board under the full moon: silver potions and three golden wild potions with little wolf ears, in a midnight-blue brew with pale blue fire round the rim.">
+  </section>
+
+  <section class="faq" id="questions">
+    <h2>Questions you might have</h2>
+    <dl>
+      <div><dt>Can we add our own words?</dt>
+        <dd>Yes. Admins can add house words with <code>/houseword add</code>, so your server’s inside jokes finally count. Or ban words with <code>/houseword ban</code>.</dd></div>
+      <div><dt>What counts as a real word?</dt>
+        <dd>Anything in the official tournament word lists, about 285,000 words. Yes, QI is a word.</dd></div>
+      <div><dt>Can I play on my own?</dt>
+        <dd>Yes. Tap <strong>Try it solo</strong> for a practice game. It won’t count on the leaderboard.</dd></div>
+      <div><dt>Can we turn the events off?</dt>
+        <dd>Yes. Pick <strong>Classic</strong> rules for a game with no events and no werewolves.</dd></div>
+      <div><dt>One of us always wins. Can we even it out?</dt>
+        <dd>Yes. The host can give them a handicap so their words score less.</dd></div>
+      <div><dt>What if someone stops taking turns?</dt>
+        <dd>The bot sends reminders, and you can <code>/nudge</code> them. After a week, the game moves on without them.</dd></div>
+      <div><dt>Does it keep score over time?</dt>
+        <dd>Yes. Each server has a leaderboard, everyone has a <code>/profile</code>, and there are titles for the best bluffer and the best bluff-catcher.</dd></div>
+      <div><dt>Is it safe to add?</dt>
+        <dd>Yes. It only needs permission to post messages and make threads, and it can’t read your server’s messages. Slurs are the only words blocked from play. Admins can block more for their own server if they want.</dd></div>
+    </dl>
   </section>
 </div>
 

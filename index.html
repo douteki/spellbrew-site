@@ -128,6 +128,13 @@
   .shelf h2, .moon h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: .75rem; }
   .shelf p, .moon p { max-width: 34rem; margin: 0 0 1rem; color: var(--text); }
 
+  /* ---------- the practice opponent: Grimalkin on the potion shelf ---------- */
+  .cat { padding: 5rem 0 1rem; display: grid; grid-template-columns: 1fr 1.15fr; gap: 3rem; align-items: center; }
+  .cat h2 { font-size: clamp(1.5rem, 2.6vw, 1.9rem); margin-bottom: .75rem; }
+  .cat p { max-width: 34rem; margin: 0 0 1rem; color: var(--text); }
+  .cat .aside { color: var(--muted); font-style: italic; }
+  .cat img { width: 100%; max-width: 640px; }
+
   /* ---------- the full moon ---------- */
   .moon { padding: 4rem 0 6rem; display: grid; grid-template-columns: 1fr 1.05fr; gap: 3rem; align-items: center; }
   .moon img { border-radius: 18px; image-rendering: auto; }
@@ -154,7 +161,7 @@
   .fine a { color: var(--muted); }
 
   @media (max-width: 860px) {
-    .hero, .moon, .shelf { grid-template-columns: 1fr; gap: 2rem; }
+    .hero, .moon, .shelf, .cat { grid-template-columns: 1fr; gap: 2rem; }
     .recipe-cols { grid-template-columns: 1fr; gap: 1.5rem; }
     .moon img { order: -1; }
     .bar nav { display: none; }
@@ -168,6 +175,7 @@
     <a class="mark" href="#top"><img src="assets/logo.png" alt="">Spellbrew</a>
     <nav aria-label="Main">
       <a href="#recipe">How it plays</a>
+      <a href="#cat">Play solo</a>
       <a href="#moon">Events</a>
       <a href="#questions">Questions</a>
       <a href="https://discord.gg/EPm9yAE4PT">Community</a>
@@ -186,7 +194,7 @@
         <div class="actions">
           <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1548506624493224027">Add to Discord</a>
           <a class="btn green" href="https://discord.gg/EPm9yAE4PT">Play in our server</a>
-          <small>Free to play. 2–4 players.</small>
+          <small>Free to play. 2–4 players, or just you and the cat.</small>
         </div>
       </div>
       <div class="board">
@@ -231,6 +239,16 @@
     <img src="assets/thread.png" width="1236" height="1022" alt="A finished Spellbrew game in a Discord thread: the final board, the scores, and The Trials revealing a bluff nobody caught.">
   </section>
 
+  <section class="cat" id="cat">
+    <div>
+      <h2>No one around? Play the cat.</h2>
+      <p>Grimalkin, the witch’s cat, will play you any time. Tap <strong>Try it solo</strong> for an easy game, or pick Easy or Medium from <strong>New game</strong>.</p>
+      <p>It mostly plays real words, but it spends a lot of time on the internet, so now and then it tries something like RIZZ or ZOOMIES. Catch it, but careful: a few of those really are in the dictionary.</p>
+      <p class="aside">It only challenges gibberish, so it’s a good place to practice your bluffing. Practice games don’t count on the leaderboard.</p>
+    </div>
+    <img src="assets/cat-shelf.png" width="640" height="280" alt="A black pixel-art cat with green eyes sits on the potion shelf beside bottles spelling C, A, T, while a potion tumbles off the end of the shelf.">
+  </section>
+
   <section class="shelf">
     <img src="assets/shelf.png" width="364" height="74" alt="A shelf of seven potion bottles: B, R, E, W, a golden unlabeled bottle, N and G.">
     <div>
@@ -261,7 +279,7 @@
         <div><dt>What counts as a real word?</dt>
           <dd>Anything in the official tournament word lists, about 285,000 words. Yes, QI is a word.</dd></div>
         <div><dt>Can I play on my own?</dt>
-          <dd>Yes. Tap <strong>Try it solo</strong> for a practice game. It won’t count on the leaderboard.</dd></div>
+          <dd>Yes. Grimalkin the witch’s cat will play you on Easy or Medium, or you can practice alone on an empty board. Neither counts on the leaderboard.</dd></div>
         <div><dt>Can we turn the events off?</dt>
           <dd>Yes. Pick <strong>Classic</strong> rules for a game with no events and no werewolves.</dd></div>
         <div><dt>One of us always wins. Can we even it out?</dt>

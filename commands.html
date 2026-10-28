@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Commands — Spellbrew</title>
+<meta name="description" content="Every Spellbrew command, and the three buttons that do most of the work.">
+<meta property="og:title" content="Spellbrew">
+<meta property="og:description" content="A witchy word game for Discord. Brew real words, bluff fake ones, and catch your friends lying.">
+<meta property="og:image" content="https://spellbrew.com/assets/board.png">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #241829;        /* the inside of the cauldron at night */
+    --iron: #3a2848;         /* Crown Jewel, a shade deeper */
+    --brew: #4e923a;         /* Enviable */
+    --brew-deep: #2e3d30;    /* Mountain View */
+    --lime: #b7db57;         /* Badass Grass */
+    --violet: #8e51a8;       /* Vibrant Violet: the potions */
+    --label: #efe3c8;        /* old apothecary label paper */
+    --ink: #2b1d22;          /* label ink */
+    --copper: #c4743e;       /* the ladle */
+    --text: #e9e2ef;
+    --muted: #b9adc4;
+    --px: 4px;               /* one pixel of the pixel art */
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--text);
+    font: 400 1.25rem/1.6 "IM Fell English", Georgia, "Times New Roman", serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; height: auto; display: block; image-rendering: pixelated; }
+  a { color: var(--lime); text-underline-offset: 3px; }
+  a:focus-visible, .btn:focus-visible { outline: 3px solid var(--lime); outline-offset: 4px; }
+  h1, h2, h3 { font-family: "Pixelify Sans", "Courier New", monospace; font-weight: 700; line-height: 1.15; margin: 0; }
+  .wrap { width: min(1120px, 100% - 3rem); margin-inline: auto; }
+
+  /* ---------- top bar ---------- */
+  .bar { display: flex; align-items: center; gap: 1.5rem; padding: 1.25rem 0; }
+  .bar .mark { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--text);
+               font: 700 1.25rem "Pixelify Sans", monospace; }
+  .bar .mark img { width: 40px; height: 40px; border-radius: 50%; image-rendering: auto; }
+  .bar nav { margin-left: auto; display: flex; gap: 1.5rem; font-size: 1rem; }
+  .bar nav a { color: var(--muted); text-decoration: none; }
+  .bar nav a:hover { color: var(--text); }
+
+  /* ---------- pixel buttons: square, stepped corners, a hard drop "shadow" ---------- */
+  .btn {
+    --face: var(--violet); --edge: #4c2a5c;
+    display: inline-block; position: relative;
+    font: 700 1.125rem "Pixelify Sans", monospace; color: #fff; text-decoration: none;
+    padding: .8rem 1.4rem; background: var(--face);
+    box-shadow: 0 calc(var(--px) * -1) 0 0 var(--face), 0 var(--px) 0 0 var(--face),
+                calc(var(--px) * -1) 0 0 0 var(--face), var(--px) 0 0 0 var(--face),
+                0 calc(var(--px) * 2) 0 0 var(--edge), var(--px) var(--px) 0 0 var(--edge), calc(var(--px) * -1) var(--px) 0 0 var(--edge);
+    margin: var(--px);
+    transition: transform .08s;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: translateY(var(--px)); }
+  .btn.green { --face: var(--brew); --edge: #2c5520; }
+
+  /* ---------- footer: the last call to action, sat on the rim of the pot ---------- */
+  footer { background: var(--brew-deep); padding: 3.5rem 0 2.5rem; }
+  .last { display: flex; flex-wrap: wrap; gap: 1.5rem 2rem; align-items: center; justify-content: space-between; }
+  .last h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); max-width: 28rem; }
+  .fine { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; font-size: .95rem; color: var(--muted); }
+  .fine a { color: var(--muted); }
+
+
+  .btn.red { --face: #b23a48; --edge: #64202a; }
+  .btn.still { cursor: default; }
+  .btn.still:active { transform: none; }
+
+  /* ---------- the top of the page ---------- */
+  .intro { padding: 2.5rem 0 3.5rem; max-width: 44rem; }
+  .intro h1 { font-size: clamp(2rem, 4.2vw, 3rem); color: var(--lime); margin-bottom: 1rem; }
+  .intro p { margin: 0; }
+
+  /* ---------- the three buttons under every board ---------- */
+  .tap { background: var(--iron); padding: 3.5rem 0 4rem; }
+  .tap h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); margin-bottom: .5rem; }
+  .tap > .wrap > p { margin: 0 0 2.25rem; color: var(--muted); max-width: 40rem; }
+  .buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .buttons .btn { margin-bottom: 1.1rem; }
+  .buttons p { margin: 0; max-width: 18rem; }
+
+  /* ---------- everything else: an index at the back of the grimoire ---------- */
+  .index { padding: 4.5rem 0 5rem; }
+  .index > h2 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); margin-bottom: .5rem; }
+  .index > p { margin: 0 0 3rem; color: var(--muted); max-width: 40rem; }
+  .groups { columns: 3 18rem; column-gap: 3.5rem; }
+  .group { break-inside: avoid; margin: 0 0 2.75rem; }
+  .group h3 { font-size: 1.15rem; color: var(--lime); padding-left: 1.25rem; position: relative; margin-bottom: .25rem; }
+  .group h3::before { content: ""; position: absolute; left: 0; top: .3em; width: 8px; height: 8px; background: var(--violet);
+                      box-shadow: 4px 4px 0 0 #4c2a5c; }
+  .group .note { font-size: 1rem; color: var(--muted); font-style: italic; margin: 0 0 .75rem 1.25rem; }
+  .group dl { margin: .9rem 0 0; }
+  .group dt { margin-top: 1rem; }
+  .group dt:first-child { margin-top: 0; }
+  .group code { font: 700 1.02rem "Pixelify Sans", "Courier New", monospace; color: var(--label); background: var(--night);
+                box-shadow: inset 0 0 0 2px #4a3558; padding: .1rem .5rem; white-space: nowrap; }
+  .group code i { font-style: normal; color: var(--muted); font-weight: 500; }
+  .group dd { margin: .3rem 0 0; line-height: 1.45; }
+  .host { font: 500 .8rem "Pixelify Sans", monospace; color: #e7d6f2; background: #5b3570; padding: .05rem .4rem; margin-left: .4rem;
+          vertical-align: .15em; }
+  .group summary { list-style: none; cursor: pointer; position: relative; padding-right: 2rem; }
+  .group summary::-webkit-details-marker { display: none; }
+  .group summary::after { content: "+"; position: absolute; right: 0; top: -.1rem; font: 700 1.2rem "Pixelify Sans", monospace;
+                          color: var(--muted); }
+  .group[open] summary::after { content: "−"; }
+  .group summary:focus-visible { outline: 3px solid var(--lime); outline-offset: 4px; }
+  .group:not([open]) { margin-bottom: 1.25rem; }
+  .group summary .note { margin-bottom: 0; }
+  .index .tip { border-left: 4px solid var(--brew); padding: .25rem 0 .25rem 1rem; color: var(--muted); max-width: 40rem; margin: 0; }
+  .index .tip code { font: .95rem "Courier New", monospace; background: var(--iron); padding: .05rem .35rem; color: var(--label); }
+
+  @media (max-width: 860px) {
+    .buttons { grid-template-columns: 1fr; gap: 1.75rem; }
+    .bar nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="bar">
+    <a class="mark" href="./"><img src="assets/logo.png" alt="">Spellbrew</a>
+    <nav aria-label="Main">
+      <a href="./#recipe">How it plays</a>
+      <a href="./#cat">Play solo</a>
+      <a href="./#moon">Events</a>
+      <a href="./#questions">Questions</a>
+      <a href="commands" aria-current="page">Commands</a>
+      <a href="https://discord.gg/EPm9yAE4PT">Community</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>Commands</h1>
+      <p>You can play a whole game without typing a single one. The buttons under the board do most of the work, and the rest is here when you want it.</p>
+    </section>
+  </main>
+</div>
+
+<section class="tap">
+  <div class="wrap">
+    <h2>Under every board</h2>
+    <p>Three buttons, and that’s most of the game.</p>
+    <div class="buttons">
+      <div>
+        <span class="btn green still">My shelf</span>
+        <p>See the potions you’re holding. Only you can see them.</p>
+      </div>
+      <div>
+        <span class="btn still">Play a word</span>
+        <p>Pick a square and a direction, type your word, and check the preview before you pour it in.</p>
+      </div>
+      <div>
+        <span class="btn red still">Challenge</span>
+        <p>Think the last word is made up? Call it before the next turn.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <section class="index">
+    <h2>Everything else</h2>
+    <p>Type <strong>/</strong> in any channel to see these in Discord. Grey words after a command are the bits you fill in.</p>
+    <div class="groups">
+      <details class="group" open>
+        <summary><h3>Starting a game</h3></summary>
+        <dl>
+          <dt><code>/newgame</code></dt>
+          <dd>Start a game in its own thread. A form asks who’s playing, which rules, or whether you’d rather play the cat.</dd>
+          <dt><code>/join</code></dt>
+          <dd>Join the game in this thread.</dd>
+          <dt><code>/start</code><span class="host">host</span></dt>
+          <dd>Begin once everyone’s in.</dd>
+          <dt><code>/uninvite <i>@person</i></code><span class="host">host</span></dt>
+          <dd>Start without someone who hasn’t joined.</dd>
+          <dt><code>/cancel</code><span class="host">host</span></dt>
+          <dd>Call off a game before it starts.</dd>
+          <dt><code>/handicap <i>@player %</i></code><span class="host">host</span></dt>
+          <dd>Make a strong player’s words score less, like 75%. Set it before the game starts.</dd>
+        </dl>
+      </details>
+      <details class="group" open>
+        <summary><h3>On your turn</h3></summary>
+        <dl>
+          <dt><code>/play</code></dt>
+          <dd>Place a word. The same as <strong>Play a word</strong>.</dd>
+          <dt><code>/rack</code></dt>
+          <dd>See your potions. The same as <strong>My shelf</strong>.</dd>
+          <dt><code>/shuffle</code></dt>
+          <dd>Mix up the order of your potions.</dd>
+          <dt><code>/swap <i>letters</i></code></dt>
+          <dd>Trade some potions for new ones. Uses your turn.</dd>
+          <dt><code>/pass</code></dt>
+          <dd>Skip your turn.</dd>
+        </dl>
+      </details>
+      <details class="group" open>
+        <summary><h3>Calling a bluff</h3></summary>
+        <dl>
+          <dt><code>/challenge</code></dt>
+          <dd>Call the last word played. If it’s fake, it curdles. If it’s real, you lose a turn.</dd>
+          <dt><code>/twoletters</code></dt>
+          <dd>Every two-letter word that counts. Handy before you challenge.</dd>
+        </dl>
+      </details>
+      <details class="group" open>
+        <summary><h3>Keeping track</h3></summary>
+        <dl>
+          <dt><code>/board</code></dt>
+          <dd>Show the board and the scores.</dd>
+          <dt><code>/scores</code></dt>
+          <dd>The scores, and whose turn it is.</dd>
+          <dt><code>/mygames</code></dt>
+          <dd>Your games that are waiting on someone.</dd>
+          <dt><code>/profile <i>@player</i></code></dt>
+          <dd>Your lifetime record, or someone else’s.</dd>
+          <dt><code>/leaderboard</code></dt>
+          <dd>This server’s best brewers.</dd>
+          <dt><code>/event</code></dt>
+          <dd>What’s on right now, like the full moon, and how you’re doing.</dd>
+        </dl>
+      </details>
+      <details class="group" open>
+        <summary><h3>When someone’s slow</h3>
+        <p class="note">After a week without a move, the game carries on without them.</p></summary>
+        <dl>
+          <dt><code>/nudge</code></dt>
+          <dd>Poke whoever’s turn it is. Once every 12 hours.</dd>
+          <dt><code>/forfeit</code><span class="host">host</span></dt>
+          <dd>Carry on without someone who hasn’t moved in 4 days.</dd>
+          <dt><code>/resign</code></dt>
+          <dd>Leave a game.</dd>
+        </dl>
+      </details>
+      <details class="group" open>
+        <summary><h3>Getting help</h3></summary>
+        <dl>
+          <dt><code>/rules</code></dt>
+          <dd>How to play.</dd>
+          <dt><code>/help</code></dt>
+          <dd>This list, inside Discord.</dd>
+          <dt><code>/about</code></dt>
+          <dd>The invite link and the support server.</dd>
+          <dt><code>/feedback <i>message</i></code></dt>
+          <dd>Send a bug, an idea or a word complaint to the person who runs Spellbrew.</dd>
+        </dl>
+      </details>
+      <details class="group" open>
+        <summary><h3>For server admins</h3>
+        <p class="note">Needs the Manage Server permission.</p></summary>
+        <dl>
+          <dt><code>/houseword add <i>word</i></code></dt>
+          <dd>Make a word count in your server, even if it isn’t in the dictionary.</dd>
+          <dt><code>/houseword ban <i>word</i></code></dt>
+          <dd>Block a word in your server.</dd>
+          <dt><code>/houseword remove <i>word</i></code></dt>
+          <dd>Undo a house rule.</dd>
+          <dt><code>/houseword list</code></dt>
+          <dd>See your server’s house words and banned words.</dd>
+        </dl>
+      </details>
+    </div>
+    <p class="tip">Lost? Type <code>/help</code> in Discord for this list, or <code>/rules</code> for how to play.</p>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="last">
+      <h2>Ready to brew?</h2>
+      <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1548506624493224027">Add to Discord</a>
+    </div>
+    <div class="fine">
+      <span>© 2026 Spellbrew</span>
+      <a href="./">Home</a>
+      <a href="privacy">Privacy</a>
+      <a href="terms">Terms</a>
+      <a href="https://top.gg/bot/1548506624493224027">Top.gg</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // On phones, start with only the first group open so the page isn't one long scroll.
+  if (window.matchMedia("(max-width: 860px)").matches) {
+    document.querySelectorAll("details.group").forEach((d, i) => { if (i > 0) d.open = false; });
+  }
+</script>
+
+</body>
+</html>
